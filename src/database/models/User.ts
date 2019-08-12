@@ -6,6 +6,11 @@ import { NextFunction } from "express";
 
 const UserSchema = new Mongoose.Schema(
   {
+    accountLocked: {
+      type: Boolean,
+      select: true,
+      default: false
+    },
     email: {
       type: String,
       required: true,
@@ -38,6 +43,7 @@ UserSchema.pre("save", async function(
 });
 
 export interface IUser extends Mongoose.Document {
+  accountLocked: boolean;
   username: string;
   email: string;
   password: string;
