@@ -36,6 +36,12 @@ export class StoreController {
         { phone: request.body.phone }
       ]));
 
+      if (storeExists) {
+        return response
+          .status(422)
+          .json({ message: "store name, email and phone must be unique" });
+      }
+
       const payload = {
         owner: user_id,
         ...request.body

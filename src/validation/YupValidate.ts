@@ -1,4 +1,4 @@
-import { IFormattedYupError, FormatYupError } from "../utils/ValidateYurpError";
+import { IFormattedYupError, FormatYupError } from "../utils/ValidateYupError";
 import { Maybe } from "../types/Maybe";
 
 export const YupValidate = async (
