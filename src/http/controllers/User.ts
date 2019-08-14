@@ -13,9 +13,15 @@ import { IUser, User } from "../../database/models/User";
 import { compare } from "bcryptjs";
 
 import { RedisSessionPrefix, ForgotPasswordPrefix } from "../../Prefixes";
+
 import { SendEmail } from "../../email/SendEmail";
 import { ForgotPasswordEmailTemplate } from "../../email/templates/ForgotPassword";
+
 import { InternalServerError } from "../messages/InternalServerError";
+import { Unauthorized } from "../messages/Unauthorized";
+import { InvalidCredentials } from "../messages/InvalidCredentials";
+import { AccountLocked } from "../messages/AccountLocked";
+import { EmailSent } from "../messages/EmailSent";
 
 export class UserController {
   public static index = async (
@@ -29,7 +35,7 @@ export class UserController {
         .skip(parseInt(page) * 20)
         .limit(20);
 
-      return response.json({ users, page });
+      return response.json({ page, users });
     } catch (ex) {
       console.error(ex);
       return response.status(500).json({ message: InternalServerError });
@@ -55,8 +61,7 @@ export class UserController {
     response: Response
   ): Promise<Response> => {
     try {
-      const { page = 0 } = request.query;
-      const { email } = request.params;
+      const { email, page = 0 } = request.query;
 
       const users: Array<IUser> = await User.find({
         email: {
@@ -67,7 +72,7 @@ export class UserController {
         .skip(parseInt(page) * 20)
         .limit(20);
 
-      return response.json({ users, page });
+      return response.json({ page, users });
     } catch (ex) {
       console.error(ex);
       return response.status(404).json({ message: "failed to find user" });
@@ -113,8 +118,6 @@ export class UserController {
     request: Request,
     response: Response
   ): Promise<Response> => {
-    const InvalidCredentialsMessage: string = "invalid credentials";
-
     try {
       const { email, password } = request.body;
       const user: Maybe<IUser> = await User.findOne({ email }).select(
@@ -122,23 +125,17 @@ export class UserController {
       );
 
       if (!user) {
-        return response
-          .status(401)
-          .json({ message: InvalidCredentialsMessage });
+        return response.status(401).json({ message: InvalidCredentials });
       }
 
       if (user.accountLocked) {
-        return response
-          .status(401)
-          .json({ message: "account locked, check your email" });
+        return response.status(401).json({ message: AccountLocked });
       }
 
       const validPassword: boolean = await compare(password, user.password);
 
       if (!validPassword) {
-        return response
-          .status(401)
-          .json({ message: InvalidCredentialsMessage });
+        return response.status(401).json({ message: InvalidCredentials });
       }
 
       (request as any).session.user_id = user._id;
@@ -155,7 +152,7 @@ export class UserController {
       return response.status(200).json(user);
     } catch (ex) {
       console.error(ex);
-      return response.status(401).json({ message: InvalidCredentialsMessage });
+      return response.status(401).json({ message: InvalidCredentials });
     }
   };
 
@@ -174,9 +171,7 @@ export class UserController {
       return response.send();
     } catch (ex) {
       console.error(ex);
-      return response
-        .status(500)
-        .json({ message: "oops, something went wrong" });
+      return response.status(500).json({ message: InternalServerError });
     }
   };
 
@@ -189,7 +184,7 @@ export class UserController {
       const { payload } = request.body;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       const user = await await User.findOneAndUpdate(
@@ -203,9 +198,7 @@ export class UserController {
       return response.status(200).json(user);
     } catch (ex) {
       console.error(ex);
-      return response
-        .status(500)
-        .json({ message: "oops, something went wrong" });
+      return response.status(500).json({ message: InternalServerError });
     }
   };
 
@@ -217,7 +210,7 @@ export class UserController {
       const { user_id } = request.session as any;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       await User.findOneAndDelete({ _id: user_id });
@@ -225,9 +218,7 @@ export class UserController {
       return UserController.logout(request, response);
     } catch (ex) {
       console.error(ex);
-      return response
-        .status(500)
-        .json({ message: "oops, something went wrong" });
+      return response.status(500).json({ message: InternalServerError });
     }
   };
 
@@ -235,15 +226,13 @@ export class UserController {
     request: Request,
     response: Response
   ): Promise<Response> => {
-    const EmailSentMessage: string = "email sent, check your inbox";
-
     try {
       const { email } = request.body;
 
       const user: Maybe<IUser> = await User.findOne({ email });
 
       if (!user) {
-        return response.status(200).json({ message: EmailSentMessage });
+        return response.status(200).json({ message: EmailSent });
       }
 
       user.accountLocked = true;
@@ -270,9 +259,7 @@ export class UserController {
       return response.send();
     } catch (ex) {
       console.error(ex);
-      return response
-        .status(500)
-        .json({ message: "oops, something went wrong" });
+      return response.status(500).json({ message: InternalServerError });
     }
   };
 
@@ -285,7 +272,7 @@ export class UserController {
       const { email, password } = request.body;
 
       if (!token) {
-        return response.status(401).json({ message: "a token is required" });
+        return response.status(401).json({ message: "token is required" });
       }
 
       const userIdThatRequestedToken: boolean = await (request as any).redis.get(
@@ -318,9 +305,7 @@ export class UserController {
       return response.status(200).json(user);
     } catch (ex) {
       console.error(ex);
-      return response
-        .status(500)
-        .json({ message: "oops, something went wrong" });
+      return response.status(500).json({ message: InternalServerError });
     }
   };
 }
