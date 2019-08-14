@@ -5,8 +5,8 @@ export const router: Router = express.Router();
 import { UserController } from "../controllers/User";
 
 router.get("/user", UserController.index);
+router.get("/user/search", UserController.search);
 router.get("/user/:_id", UserController.getById);
-router.get("/user/search/stuff", UserController.search);
 
 router.post("/user/register", UserController.register);
 router.post("/user/logout", UserController.logout);

@@ -1,6 +1,9 @@
 import { Response, Request } from "express";
+
 import { Store, IStore } from "../../database/models/Store";
+
 import { InternalServerError } from "../messages/InternalServerError";
+import { Unauthorized } from "../messages/Unauthorized";
 
 export class StoreController {
   public static index = async (
@@ -8,13 +11,12 @@ export class StoreController {
     response: Response
   ): Promise<Response> => {
     try {
+      const { page = 0 } = request.query;
       const { user_id } = request.session as any;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
-
-      const { page = 0 } = request.query;
 
       const stores = await Store.find({ owner: user_id })
         .skip(parseInt(page) * 20)
@@ -81,9 +83,7 @@ export class StoreController {
       return response.json({ stores, page });
     } catch (ex) {
       console.error(ex);
-      return response
-        .status(500)
-        .json({ message: "oops something went wrong" });
+      return response.status(500).json({ message: InternalServerError });
     }
   };
 
@@ -95,7 +95,7 @@ export class StoreController {
       const { user_id } = request.session as any;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       const storeExists = !!(await Store.findOne({}).or([
@@ -111,8 +111,8 @@ export class StoreController {
       }
 
       const payload = {
-        owner: user_id,
-        ...request.body
+        ...request.body,
+        owner: user_id
       };
 
       const store: IStore = await Store.create(payload);
@@ -120,7 +120,7 @@ export class StoreController {
       return response.status(201).json(store);
     } catch (ex) {
       console.error(ex);
-      return response.status(422).json({ message: "failed to register store" });
+      return response.status(422).json({ message: InternalServerError });
     }
   };
 
@@ -133,10 +133,8 @@ export class StoreController {
       const { payload } = request.body;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
-
-      console.log("payload", payload);
 
       const store = await Store.findOneAndUpdate({ owner: user_id }, payload, {
         new: true
@@ -145,9 +143,7 @@ export class StoreController {
       return response.status(200).json(store);
     } catch (ex) {
       console.error(ex);
-      return response
-        .status(500)
-        .json({ message: "oops something went wrong" });
+      return response.status(500).json({ message: InternalServerError });
     }
   };
 
@@ -158,16 +154,11 @@ export class StoreController {
     try {
       const { user_id } = request.session as any;
       const { _id } = request.params;
-
-      console.log("user_id", user_id);
-      console.log("_id", _id);
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       const store = await Store.findOne({ _id });
-
-      console.log("store", store);
 
       if (!store || (store.owner as any)._id != user_id) {
         return response.status(401).json({ message: "user must own store" });
@@ -182,9 +173,7 @@ export class StoreController {
       return response.send();
     } catch (ex) {
       console.error(ex);
-      return response
-        .status(500)
-        .json({ message: "oops, something went wrong" });
+      return response.status(500).json({ message: InternalServerError });
     }
   };
 }

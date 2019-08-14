@@ -1,11 +1,16 @@
 import { Request, Response } from "express";
-import { InternalServerError } from "../messages/InternalServerError";
+
 import { Maybe } from "../../types/Maybe";
+
 import { IFormattedYupError } from "../../utils/ValidateYupError";
 import { YupValidate } from "../../validation/YupValidate";
 import { ClientRegisterSchema } from "../../validation/schemas/ClientRegister";
+
 import { Client, IClient } from "../../database/models/Client";
 import { Store } from "../../database/models/Store";
+
+import { Unauthorized } from "../messages/Unauthorized";
+import { InternalServerError } from "../messages/InternalServerError";
 
 export class ClientController {
   public static index = async (
@@ -17,7 +22,7 @@ export class ClientController {
       const { store_id, page = 0 } = request.query;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       const store = await Store.findOne({ _id: store_id });
@@ -46,7 +51,7 @@ export class ClientController {
       const { _id } = request.params;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       const [client] = (await Client.find({ _id })).filter(
@@ -68,7 +73,7 @@ export class ClientController {
       const { user_id } = request.session as any;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       const errors: Maybe<Array<IFormattedYupError>> = await YupValidate(
@@ -111,7 +116,7 @@ export class ClientController {
       const { payload } = request.body;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       const client = await Client.findOneAndUpdate({ _id }, payload, {
@@ -134,7 +139,7 @@ export class ClientController {
       const { _id } = request.params;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       await Client.findOneAndDelete({ _id });
