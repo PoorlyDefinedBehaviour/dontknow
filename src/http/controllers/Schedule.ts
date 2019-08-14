@@ -1,12 +1,17 @@
 import { Request, Response } from "express";
-import { InternalServerError } from "../messages/InternalServerError";
+
 import { Maybe } from "../../types/Maybe";
+
 import { IFormattedYupError } from "../../utils/ValidateYupError";
 import { YupValidate } from "../../validation/YupValidate";
 import { ScheduleRegisterSchema } from "../../validation/schemas/ScheduleRegister";
+
 import { ISchedule, Schedule } from "../../database/models/Schedule";
 import { Store } from "../../database/models/Store";
 import { Client } from "../../database/models/Client";
+
+import { Unauthorized } from "../messages/Unauthorized";
+import { InternalServerError } from "../messages/InternalServerError";
 
 export class ScheduleController {
   public static index = async (
@@ -36,7 +41,7 @@ export class ScheduleController {
       const { _id } = request.params;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       const schedule = await Schedule.findOne({
@@ -47,12 +52,42 @@ export class ScheduleController {
         !schedule ||
         (schedule.issuer as any).owner._id.toString() !== user_id.toString()
       ) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       console.log("schedule", schedule);
 
       return response.json(schedule);
+    } catch (ex) {
+      console.error(ex);
+      return response.status(500).json({ message: InternalServerError });
+    }
+  };
+
+  public static search = async (
+    request: Request,
+    response: Response
+  ): Promise<Response> => {
+    try {
+      const { date, time, page = 0 } = request.query;
+      console.log(date, time, page);
+
+      const schedules: Array<ISchedule> = await Schedule.find({
+        $or: [
+          {
+            date: {
+              $regex: new RegExp(date),
+              $options: "i"
+            }
+          }
+        ]
+      })
+        .skip(parseInt(page) * 20)
+        .limit(20);
+
+      console.log("num schedules", schedules.length);
+
+      return response.json({ page, schedules });
     } catch (ex) {
       console.error(ex);
       return response.status(500).json({ message: InternalServerError });
@@ -67,7 +102,7 @@ export class ScheduleController {
       const { user_id } = request.session as any;
 
       if (!user_id) {
-        return response.status(401).json({ message: "user must be logged in" });
+        return response.status(401).json({ message: Unauthorized });
       }
 
       const errors: Maybe<Array<IFormattedYupError>> = await YupValidate(
