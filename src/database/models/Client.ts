@@ -1,7 +1,14 @@
 import Mongoose from "../MongoDB";
+import { NextFunction } from "express";
 
 const ClientSchema = new Mongoose.Schema(
   {
+    store: {
+      type: Mongoose.Schema.Types.ObjectId,
+      ref: "Store",
+      required: true,
+      select: true
+    },
     name: {
       type: String,
       required: true,
@@ -11,7 +18,7 @@ const ClientSchema = new Mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: false,
+      unique: true,
       select: true
     },
     phone: {
@@ -26,7 +33,18 @@ const ClientSchema = new Mongoose.Schema(
   }
 ).index({ name: "text", email: "text", phone: "text" });
 
+function populate(this: any, next: NextFunction): void {
+  this.populate("store");
+  next();
+}
+
+ClientSchema.pre("find", populate);
+ClientSchema.pre("findOne", populate);
+ClientSchema.pre("findById", populate);
+
 export interface IClient extends Mongoose.Document {
+  _id: string;
+  store: Mongoose.Types.ObjectId;
   name: string;
   email: string;
   phone: string;

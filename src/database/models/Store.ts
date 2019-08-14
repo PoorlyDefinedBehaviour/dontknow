@@ -39,8 +39,8 @@ const StoreSchema = new Mongoose.Schema(
   }
 ).index({ name: "text" });
 
-async function populate(this: any, next: NextFunction): Promise<void> {
-  await this.populate("owner");
+function populate(this: any, next: NextFunction): void {
+  this.populate("owner");
   next();
 }
 
@@ -49,6 +49,7 @@ StoreSchema.pre("findOne", populate);
 StoreSchema.pre("findById", populate);
 
 export interface IStore extends Mongoose.Document {
+  _id: string;
   owner: Mongoose.Types.ObjectId;
   owner_name: string;
   name: string;

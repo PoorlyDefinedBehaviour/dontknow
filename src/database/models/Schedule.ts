@@ -31,9 +31,9 @@ const ScheduleSchema = new Mongoose.Schema(
   }
 );
 
-async function populate(this: any, next: NextFunction): Promise<void> {
-  await this.populate("issuer");
-  await this.populate("client");
+function populate(this: any, next: NextFunction): void {
+  this.populate("issuer");
+  this.populate("client");
 
   next();
 }
@@ -42,13 +42,15 @@ ScheduleSchema.pre("find", populate);
 ScheduleSchema.pre("findOne", populate);
 ScheduleSchema.pre("findById", populate);
 
-export interface IStore extends Mongoose.Document {
-  name: string;
-  phone: string;
-  owner: Mongoose.Types.ObjectId;
+export interface ISchedule extends Mongoose.Document {
+  _id: string;
+  issuer: Mongoose.Types.ObjectId;
+  client: Mongoose.Types.ObjectId;
+  date: string;
+  time: string;
 }
 
-export const User: Mongoose.Model<IStore> = Mongoose.model<IStore>(
-  "Store",
+export const Schedule: Mongoose.Model<ISchedule> = Mongoose.model<ISchedule>(
+  "Schedule",
   ScheduleSchema
 );

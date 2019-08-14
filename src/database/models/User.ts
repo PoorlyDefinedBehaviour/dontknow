@@ -43,8 +43,8 @@ UserSchema.pre("save", async function(
 });
 
 export interface IUser extends Mongoose.Document {
+  _id: string;
   accountLocked: boolean;
-  username: string;
   email: string;
   password: string;
 }
