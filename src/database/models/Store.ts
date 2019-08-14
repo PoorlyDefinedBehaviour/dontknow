@@ -9,12 +9,6 @@ const StoreSchema = new Mongoose.Schema(
       required: true,
       select: true
     },
-    owner_name: {
-      type: String,
-      required: true,
-      unique: false,
-      select: true
-    },
     name: {
       type: String,
       required: true,
@@ -37,10 +31,11 @@ const StoreSchema = new Mongoose.Schema(
   {
     timestamps: true
   }
-).index({ name: "text" });
+).index({ name: "text", email: "text", phone: "text" });
 
 function populate(this: any, next: NextFunction): void {
   this.populate("owner");
+
   next();
 }
 
@@ -51,7 +46,6 @@ StoreSchema.pre("findById", populate);
 export interface IStore extends Mongoose.Document {
   _id: string;
   owner: Mongoose.Types.ObjectId;
-  owner_name: string;
   name: string;
   email: string;
   phone: string;

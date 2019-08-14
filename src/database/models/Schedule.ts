@@ -29,7 +29,7 @@ const ScheduleSchema = new Mongoose.Schema(
   {
     timestamps: true
   }
-);
+).index({ date: "text", time: "text" });
 
 function populate(this: any, next: NextFunction): void {
   this.populate("issuer");
