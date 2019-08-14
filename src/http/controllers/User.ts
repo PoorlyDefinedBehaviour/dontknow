@@ -4,7 +4,7 @@ import { v4 } from "uuid";
 
 import { IFormattedYupError } from "../../utils/ValidateYupError";
 import { YupValidate } from "../../validation/YupValidate";
-import { UserRegisterSchema } from "../../validation/schemas/Register";
+import { UserRegisterSchema } from "../../validation/schemas/UserRegister";
 
 import { Maybe } from "../../types/Maybe";
 
@@ -15,10 +15,26 @@ import { compare } from "bcryptjs";
 import { RedisSessionPrefix, ForgotPasswordPrefix } from "../../Prefixes";
 import { SendEmail } from "../../email/SendEmail";
 import { ForgotPasswordEmailTemplate } from "../../email/templates/ForgotPassword";
+import { InternalServerError } from "../messages/InternalServerError";
 
 export class UserController {
-  public static index = async (_: any, response: Response): Promise<Response> =>
-    response.json(await User.find());
+  public static index = async (
+    request: Request,
+    response: Response
+  ): Promise<Response> => {
+    try {
+      const { page = 0 } = request.query;
+
+      const users = await User.find()
+        .skip(parseInt(page) * 20)
+        .limit(20);
+
+      return response.json({ users, page });
+    } catch (ex) {
+      console.error(ex);
+      return response.status(500).json({ message: InternalServerError });
+    }
+  };
 
   public static getById = async (
     request: Request,
@@ -48,10 +64,10 @@ export class UserController {
           $options: "i"
         }
       })
-        .skip(page * 20)
+        .skip(parseInt(page) * 20)
         .limit(20);
 
-      return response.json(users);
+      return response.json({ users, page });
     } catch (ex) {
       console.error(ex);
       return response.status(404).json({ message: "failed to find user" });
@@ -63,21 +79,24 @@ export class UserController {
     response: Response
   ): Promise<Response> => {
     try {
+      const { email } = request.body;
+
       const errors: Maybe<Array<IFormattedYupError>> = await YupValidate(
         UserRegisterSchema,
         request.body
       );
 
-      const { email } = request.body;
+      if (errors) {
+        return response.status(422).json(errors);
+      }
 
       const userExists = await User.findOne({ email });
+
       if (userExists) {
         return response
           .status(422)
           .json({ message: "username or email already in use" });
       }
-
-      if (errors) return response.status(422).json(errors);
 
       const user: IUser = await User.create(request.body);
 
@@ -231,20 +250,23 @@ export class UserController {
 
       await user.save();
 
-      const id: string = v4();
+      const token: string = v4();
 
       await (request as any).redis.set(
-        `${ForgotPasswordPrefix}${id}`,
+        `${ForgotPasswordPrefix}${token}`,
         user._id,
         "ex",
         60 * 20
       );
 
+      const link: string = `http://${request.headers.host}/reset/${token}`;
+
       SendEmail(
         email,
         "Good Doggy password reset",
-        ForgotPasswordEmailTemplate
+        ForgotPasswordEmailTemplate(link)
       );
+
       return response.send();
     } catch (ex) {
       console.error(ex);
@@ -254,24 +276,34 @@ export class UserController {
     }
   };
 
-  public static changePassoword = async (
+  public static changePassword = async (
     request: Request,
     response: Response
   ): Promise<Response> => {
-    const EmailSentMessage: string = "email sent, check your inbox";
-
     try {
+      const { token } = request.params;
       const { email, password } = request.body;
 
-      console.log("email", email);
-      console.log("password", password);
+      if (!token) {
+        return response.status(401).json({ message: "a token is required" });
+      }
+
+      const userIdThatRequestedToken: boolean = await (request as any).redis.get(
+        `${ForgotPasswordPrefix}${token}`
+      );
+
+      if (!userIdThatRequestedToken) {
+        return response.status(401).json({ message: "link expired" });
+      }
 
       const user: Maybe<IUser> = await User.findOne({ email });
 
-      console.log("user", user);
-
       if (!user) {
-        return response.status(200).json({ message: EmailSentMessage });
+        return response.status(401).json({ message: "invalid email" });
+      }
+
+      if (user._id.toString() !== userIdThatRequestedToken.toString()) {
+        return response.status(200).json({ message: "invalid token" });
       }
 
       user.password = password;
@@ -279,7 +311,8 @@ export class UserController {
 
       await user.save();
 
-      console.log(await User.findOne({ email }));
+      await (request as any).redis.del(`${ForgotPasswordPrefix}${token}`);
+
       user.password = "";
 
       return response.status(200).json(user);
