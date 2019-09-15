@@ -1,13 +1,14 @@
-import Mongoose from "../MongoDB";
-import { NextFunction } from "express";
+import mongoose from "../MongoDB";
+const mongooseAutoPopulate = require("mongoose-autopopulate");
 
-const ClientSchema = new Mongoose.Schema(
+const ClientSchema = new mongoose.Schema(
   {
     store: {
-      type: Mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Store",
       required: true,
-      select: true
+      select: true,
+      autopopulate: true
     },
     name: {
       type: String,
@@ -31,26 +32,16 @@ const ClientSchema = new Mongoose.Schema(
   {
     timestamps: true
   }
-).index({ name: "text", email: "text", phone: "text" });
+)
+  .index({ name: "text", email: "text", phone: "text" })
+  .plugin(mongooseAutoPopulate);
 
-function populate(this: any, next: NextFunction): void {
-  this.populate("store");
-  next();
-}
-
-ClientSchema.pre("find", populate);
-ClientSchema.pre("findOne", populate);
-ClientSchema.pre("findById", populate);
-
-export interface IClient extends Mongoose.Document {
+export interface IClient extends mongoose.Document {
   _id: string;
-  store: Mongoose.Types.ObjectId;
+  store: mongoose.Types.ObjectId;
   name: string;
   email: string;
   phone: string;
 }
 
-export const Client: Mongoose.Model<IClient> = Mongoose.model<IClient>(
-  "Client",
-  ClientSchema
-);
+export default mongoose.model<IClient>("Client", ClientSchema);

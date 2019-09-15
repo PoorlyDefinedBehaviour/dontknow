@@ -1,19 +1,21 @@
-import Mongoose from "../MongoDB";
-import { NextFunction } from "express";
+import mongoose from "../MongoDB";
+const mongooseAutoPopulate = require("mongoose-autopopulate");
 
-const ScheduleSchema = new Mongoose.Schema(
+const ScheduleSchema = new mongoose.Schema(
   {
     issuer: {
-      type: Mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Store",
       required: true,
-      select: true
+      select: true,
+      autopopulate: true
     },
     client: {
-      type: Mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Client",
       required: true,
-      select: true
+      select: true,
+      autopopulate: true
     },
     date: {
       type: String,
@@ -29,28 +31,16 @@ const ScheduleSchema = new Mongoose.Schema(
   {
     timestamps: true
   }
-).index({ date: "text", time: "text" });
+)
+  .index({ date: "text", time: "text" })
+  .plugin(mongooseAutoPopulate);
 
-function populate(this: any, next: NextFunction): void {
-  this.populate("issuer");
-  this.populate("client");
-
-  next();
-}
-
-ScheduleSchema.pre("find", populate);
-ScheduleSchema.pre("findOne", populate);
-ScheduleSchema.pre("findById", populate);
-
-export interface ISchedule extends Mongoose.Document {
+export interface ISchedule extends mongoose.Document {
   _id: string;
-  issuer: Mongoose.Types.ObjectId;
-  client: Mongoose.Types.ObjectId;
+  issuer: mongoose.Types.ObjectId;
+  client: mongoose.Types.ObjectId;
   date: string;
   time: string;
 }
 
-export const Schedule: Mongoose.Model<ISchedule> = Mongoose.model<ISchedule>(
-  "Schedule",
-  ScheduleSchema
-);
+export default mongoose.model<ISchedule>("Schedule", ScheduleSchema);

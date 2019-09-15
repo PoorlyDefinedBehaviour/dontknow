@@ -1,8 +1,7 @@
 import express, { Router } from "express";
+import UserController from "../controllers/User";
 
-export const router: Router = express.Router();
-
-import { UserController } from "../controllers/User";
+const router: Router = express.Router();
 
 router.get("/user", UserController.index);
 router.get("/user/search", UserController.search);
@@ -14,5 +13,8 @@ router.post("/user/login", UserController.login);
 router.post("/user/forgot-password", UserController.forgotPassword);
 
 router.patch("/user/change-password/:token", UserController.changePassword);
+
 router.patch("/user", UserController.update);
 router.delete("/user", UserController.delete);
+
+export default router;
