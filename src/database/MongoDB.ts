@@ -1,9 +1,9 @@
-import Mongoose from "mongoose";
+import mongoose from "mongoose";
 
-Mongoose.set("useCreateIndex", true);
-Mongoose.set("useFindAndModify", false);
+mongoose.set("useCreateIndex", true);
+mongoose.set("useFindAndModify", false);
 
-Mongoose.connect(
+mongoose.connect(
   process.env.MONGODB_URL as string,
   {
     useCreateIndex: true,
@@ -18,4 +18,4 @@ Mongoose.connect(
   }
 );
 
-export default Mongoose;
+export default mongoose;
