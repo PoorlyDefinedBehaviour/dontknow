@@ -30,10 +30,6 @@ export default class ScheduleController {
     const { user_id } = request.session;
     const { _id } = request.params;
 
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
-
     const schedule: Maybe<ISchedule> = await Schedule.findOne({
       _id
     });
@@ -81,10 +77,6 @@ export default class ScheduleController {
     response: Response
   ): Promise<Response> => {
     const { user_id } = request.session;
-
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
 
     const errors: Maybe<IFormattedYupError[]> = await yupValidate(
       ScheduleRegisterSchema,

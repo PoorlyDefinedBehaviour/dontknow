@@ -9,7 +9,6 @@ import { compare } from "bcryptjs";
 import { RedisSessionPrefix, ForgotPasswordPrefix } from "../../Prefixes";
 import { SendEmail } from "../../email/SendEmail";
 import { ForgotPasswordEmailTemplate } from "../../email/templates/ForgotPassword";
-import { Unauthorized } from "../messages/Unauthorized";
 import { InvalidCredentials } from "../messages/InvalidCredentials";
 import { AccountLocked } from "../messages/AccountLocked";
 import { EmailSent } from "../messages/EmailSent";
@@ -144,10 +143,6 @@ export default class UserController {
     const { user_id } = request.session;
     const { payload } = request.body;
 
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
-
     const user = await await User.findOneAndUpdate({ _id: user_id }, payload, {
       new: true
     });
@@ -160,10 +155,6 @@ export default class UserController {
     response: Response
   ): Promise<Response> => {
     const { user_id } = request.session;
-
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
 
     await User.findOneAndDelete({ _id: user_id });
 

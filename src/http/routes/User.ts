@@ -1,5 +1,6 @@
 import express, { Router } from "express";
 import UserController from "../controllers/User";
+import sessionRequired from "../middlewares/SessionRequired";
 
 const router: Router = express.Router();
 
@@ -14,7 +15,7 @@ router.post("/user/forgot-password", UserController.forgotPassword);
 
 router.patch("/user/change-password/:token", UserController.changePassword);
 
-router.patch("/user", UserController.update);
-router.delete("/user", UserController.delete);
+router.patch("/user", sessionRequired, UserController.update);
+router.delete("/user", sessionRequired, UserController.delete);
 
 export default router;

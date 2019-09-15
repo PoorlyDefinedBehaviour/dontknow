@@ -4,7 +4,6 @@ import { IFormattedYupError } from "../../utils/FormatYupError";
 import { ClientRegisterSchema } from "../../validation/schemas/ClientRegister";
 import Client, { IClient } from "../../database/models/Client";
 import Store, { IStore } from "../../database/models/Store";
-import { Unauthorized } from "../messages/Unauthorized";
 import yupValidate from "../../utils/YupValidate";
 import RequestWithSession from "../../interfaces/RequestWithSession";
 
@@ -15,10 +14,6 @@ export default class ClientController {
   ): Promise<Response> => {
     const { user_id } = request.session;
     const { store_id, page = 0 } = request.query;
-
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
 
     const store: Maybe<IStore> = await Store.findOne({ _id: store_id });
 
@@ -40,10 +35,6 @@ export default class ClientController {
     const { user_id } = request.session;
     const { _id } = request.params;
 
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
-
     const [client]: IClient[] = (await Client.find({ _id })).filter(
       (c: any): boolean => c.store.owner._id == user_id
     );
@@ -56,10 +47,6 @@ export default class ClientController {
     response: Response
   ): Promise<Response> => {
     const { user_id } = request.session;
-
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
 
     const errors: Maybe<IFormattedYupError[]> = await yupValidate(
       ClientRegisterSchema,
@@ -95,13 +82,8 @@ export default class ClientController {
     request: RequestWithSession,
     response: Response
   ): Promise<Response> => {
-    const { user_id } = request.session;
     const { _id } = request.params;
     const { payload } = request.body;
-
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
 
     const client: Maybe<IClient> = await Client.findOneAndUpdate(
       { _id },
@@ -118,12 +100,7 @@ export default class ClientController {
     request: RequestWithSession,
     response: Response
   ): Promise<Response> => {
-    const { user_id } = request.session;
     const { _id } = request.params;
-
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
 
     await Client.findOneAndDelete({ _id });
 

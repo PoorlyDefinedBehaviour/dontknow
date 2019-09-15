@@ -1,6 +1,5 @@
 import { Response } from "express";
 import Store, { IStore } from "../../database/models/Store";
-import { Unauthorized } from "../messages/Unauthorized";
 import RequestWithSession from "../../interfaces/RequestWithSession";
 import { Maybe } from "../../types/Maybe";
 
@@ -11,10 +10,6 @@ export default class StoreController {
   ): Promise<Response> => {
     const { page = 0 } = request.query;
     const { user_id } = request.session;
-
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
 
     const stores: IStore[] = await Store.find({ owner: user_id })
       .skip(parseInt(page) * 20)
@@ -79,10 +74,6 @@ export default class StoreController {
   ): Promise<Response> => {
     const { user_id } = request.session;
 
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
-
     const storeExists: Maybe<IStore> = await Store.findOne({}).or([
       { name: request.body.name },
       { email: request.body.email },
@@ -112,10 +103,6 @@ export default class StoreController {
     const { user_id } = request.session;
     const { payload } = request.body;
 
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
-
     const store: Maybe<IStore> = await Store.findOneAndUpdate(
       { owner: user_id },
       payload,
@@ -133,10 +120,6 @@ export default class StoreController {
   ): Promise<Response> => {
     const { user_id } = request.session;
     const { _id } = request.params;
-
-    if (!user_id) {
-      return response.status(401).json({ message: Unauthorized });
-    }
 
     const store: Maybe<IStore> = await Store.findOne({ _id });
 
