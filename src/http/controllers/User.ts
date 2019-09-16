@@ -9,11 +9,15 @@ import { compare } from "bcryptjs";
 import { RedisSessionPrefix, ForgotPasswordPrefix } from "../../Prefixes";
 import { SendEmail } from "../../email/SendEmail";
 import { ForgotPasswordEmailTemplate } from "../../email/templates/ForgotPassword";
-import { InvalidCredentials } from "../messages/InvalidCredentials";
-import { AccountLocked } from "../messages/AccountLocked";
-import { EmailSent } from "../messages/EmailSent";
 import RequestWithSession from "../../interfaces/RequestWithSession";
 import redis from "../../Redis";
+import {
+  getStatusText,
+  UNAUTHORIZED,
+  UNPROCESSABLE_ENTITY,
+  OK,
+  BAD_REQUEST
+} from "http-status-codes";
 
 export default class UserController {
   public static index = async (
@@ -70,14 +74,14 @@ export default class UserController {
     );
 
     if (errors) {
-      return response.status(422).json(errors);
+      return response.status(UNPROCESSABLE_ENTITY).json(errors);
     }
 
     const userExists: Maybe<IUser> = await User.findOne({ email });
 
     if (userExists) {
       return response
-        .status(422)
+        .status(UNPROCESSABLE_ENTITY)
         .json({ message: "username or email already in use" });
     }
 
@@ -98,17 +102,23 @@ export default class UserController {
     );
 
     if (!user) {
-      return response.status(401).json({ message: InvalidCredentials });
+      return response
+        .status(UNAUTHORIZED)
+        .json({ message: getStatusText(UNAUTHORIZED) });
     }
 
     if (user.accountLocked) {
-      return response.status(401).json({ message: AccountLocked });
+      return response
+        .status(UNAUTHORIZED)
+        .json({ message: "Account is locked, check your email." });
     }
 
     const validPassword: boolean = await compare(password, user.password);
 
     if (!validPassword) {
-      return response.status(401).json({ message: InvalidCredentials });
+      return response
+        .status(UNAUTHORIZED)
+        .json({ message: getStatusText(UNAUTHORIZED) });
     }
 
     request.session.user_id = user._id;
@@ -119,7 +129,7 @@ export default class UserController {
 
     user.password = "";
 
-    return response.status(200).json(user);
+    return response.status(OK).json(user);
   };
 
   public static logout = async (
@@ -147,7 +157,7 @@ export default class UserController {
       new: true
     });
 
-    return response.status(200).json(user);
+    return response.status(OK).json(user);
   };
 
   public static delete = async (
@@ -170,7 +180,9 @@ export default class UserController {
     const user: Maybe<IUser> = await User.findOne({ email });
 
     if (!user) {
-      return response.status(200).json({ message: EmailSent });
+      return response
+        .status(OK)
+        .json({ message: "An email has been sent, check your inbox" });
     }
 
     user.accountLocked = true;
@@ -200,7 +212,9 @@ export default class UserController {
     const { email, password } = request.body;
 
     if (!token) {
-      return response.status(401).json({ message: "token is required" });
+      return response
+        .status(BAD_REQUEST)
+        .json({ message: getStatusText(BAD_REQUEST) });
     }
 
     const userIdThatRequestedToken: Maybe<string> = await redis.get(
@@ -208,17 +222,23 @@ export default class UserController {
     );
 
     if (!userIdThatRequestedToken) {
-      return response.status(401).json({ message: "link expired" });
+      return response
+        .status(BAD_REQUEST)
+        .json({ message: getStatusText(BAD_REQUEST) });
     }
 
     const user: Maybe<IUser> = await User.findOne({ email });
 
     if (!user) {
-      return response.status(401).json({ message: "invalid email" });
+      return response
+        .status(BAD_REQUEST)
+        .json({ message: getStatusText(BAD_REQUEST) });
     }
 
     if (user._id.toString() !== userIdThatRequestedToken.toString()) {
-      return response.status(200).json({ message: "invalid token" });
+      return response
+        .status(BAD_REQUEST)
+        .json({ message: getStatusText(BAD_REQUEST) });
     }
 
     user.password = password;
@@ -230,6 +250,6 @@ export default class UserController {
 
     user.password = "";
 
-    return response.status(200).json(user);
+    return response.status(OK).json(user);
   };
 }

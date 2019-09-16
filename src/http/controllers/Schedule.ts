@@ -6,8 +6,13 @@ import { ScheduleRegisterSchema } from "../../validation/schemas/ScheduleRegiste
 import Schedule, { ISchedule } from "../../database/models/Schedule";
 import Store from "../../database/models/Store";
 import Client from "../../database/models/Client";
-import { Unauthorized } from "../messages/Unauthorized";
 import RequestWithSession from "../../interfaces/RequestWithSession";
+import {
+  UNAUTHORIZED,
+  getStatusText,
+  UNPROCESSABLE_ENTITY,
+  CREATED
+} from "http-status-codes";
 
 export default class ScheduleController {
   public static index = async (
@@ -30,15 +35,15 @@ export default class ScheduleController {
     const { user_id } = request.session;
     const { _id } = request.params;
 
-    const schedule: Maybe<ISchedule> = await Schedule.findOne({
-      _id
-    });
+    const schedule: Maybe<ISchedule> = await Schedule.findOne({ _id });
 
     if (
       !schedule ||
       (schedule.issuer as any).owner._id.toString() !== user_id.toString()
     ) {
-      return response.status(401).json({ message: Unauthorized });
+      return response
+        .status(UNAUTHORIZED)
+        .json({ message: getStatusText(UNAUTHORIZED) });
     }
 
     return response.json(schedule);
@@ -84,7 +89,7 @@ export default class ScheduleController {
     );
 
     if (errors) {
-      return response.status(422).json(errors);
+      return response.status(UNPROCESSABLE_ENTITY).json(errors);
     }
 
     const store = await Store.findOne({ owner: user_id }).lean();
@@ -95,11 +100,13 @@ export default class ScheduleController {
       !client ||
       client.store._id.toString() !== store._id.toString()
     ) {
-      return response.status(401).json({ message: "user must be store owner" });
+      return response
+        .status(UNAUTHORIZED)
+        .json({ message: getStatusText(UNAUTHORIZED) });
     }
 
     const schedule: ISchedule = await Schedule.create(request.body);
 
-    return response.status(201).json(schedule);
+    return response.status(CREATED).json(schedule);
   };
 }

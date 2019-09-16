@@ -6,6 +6,12 @@ import Client, { IClient } from "../../database/models/Client";
 import Store, { IStore } from "../../database/models/Store";
 import yupValidate from "../../utils/YupValidate";
 import RequestWithSession from "../../interfaces/RequestWithSession";
+import {
+  UNAUTHORIZED,
+  getStatusText,
+  UNPROCESSABLE_ENTITY,
+  CREATED
+} from "http-status-codes";
 
 export default class ClientController {
   public static index = async (
@@ -18,7 +24,9 @@ export default class ClientController {
     const store: Maybe<IStore> = await Store.findOne({ _id: store_id });
 
     if (!store || (store.owner as any)._id != user_id) {
-      return response.status(401).json({ message: "user must own store" });
+      return response
+        .status(UNAUTHORIZED)
+        .json({ message: getStatusText(UNAUTHORIZED) });
     }
 
     const clients: IClient[] = await Client.find({ store: store._id })
@@ -54,7 +62,7 @@ export default class ClientController {
     );
 
     if (errors) {
-      return response.status(422).json(errors);
+      return response.status(UNPROCESSABLE_ENTITY).json(errors);
     }
 
     const store: Maybe<IStore> = await Store.findOne({
@@ -62,7 +70,9 @@ export default class ClientController {
     });
 
     if (!store || (store.owner as any)._id != user_id) {
-      return response.status(401).json({ message: "user must own store" });
+      return response
+        .status(UNAUTHORIZED)
+        .json({ message: getStatusText(UNAUTHORIZED) });
     }
 
     const clientExists: Maybe<IClient> = await Client.findOne({
@@ -70,12 +80,14 @@ export default class ClientController {
     });
 
     if (clientExists) {
-      return response.status(422).json({ message: "email already in use" });
+      return response
+        .status(UNPROCESSABLE_ENTITY)
+        .json({ message: getStatusText(UNPROCESSABLE_ENTITY) });
     }
 
     const client: IClient = await Client.create(request.body);
 
-    return response.status(201).json(client);
+    return response.status(CREATED).json(client);
   };
 
   public static patch = async (

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { InternalServerError } from "../messages/InternalServerError";
+import { getStatusText, INTERNAL_SERVER_ERROR } from "http-status-codes";
 
 export default (
   error: Error,
@@ -10,6 +10,8 @@ export default (
   console.error(error);
 
   return /prod/gi.test(process.env.NODE_ENV as string)
-    ? response.status(500).json({ message: InternalServerError })
-    : response.status(500).json(error);
+    ? response
+        .status(INTERNAL_SERVER_ERROR)
+        .json({ message: getStatusText(INTERNAL_SERVER_ERROR) })
+    : response.status(INTERNAL_SERVER_ERROR).json(error);
 };

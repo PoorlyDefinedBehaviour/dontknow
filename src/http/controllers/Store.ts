@@ -2,6 +2,13 @@ import { Response } from "express";
 import Store, { IStore } from "../../database/models/Store";
 import RequestWithSession from "../../interfaces/RequestWithSession";
 import { Maybe } from "../../types/Maybe";
+import {
+  UNPROCESSABLE_ENTITY,
+  getStatusText,
+  CREATED,
+  OK,
+  UNAUTHORIZED
+} from "http-status-codes";
 
 export default class StoreController {
   public static index = async (
@@ -82,8 +89,8 @@ export default class StoreController {
 
     if (storeExists) {
       return response
-        .status(422)
-        .json({ message: "store name, email and phone must be unique" });
+        .status(UNPROCESSABLE_ENTITY)
+        .json({ message: getStatusText(UNPROCESSABLE_ENTITY) });
     }
 
     const payload = {
@@ -93,7 +100,7 @@ export default class StoreController {
 
     const store: IStore = await Store.create(payload);
 
-    return response.status(201).json(store);
+    return response.status(CREATED).json(store);
   };
 
   public static patch = async (
@@ -111,7 +118,7 @@ export default class StoreController {
       }
     );
 
-    return response.status(200).json(store);
+    return response.status(OK).json(store);
   };
 
   public static delete = async (
@@ -124,7 +131,9 @@ export default class StoreController {
     const store: Maybe<IStore> = await Store.findOne({ _id });
 
     if (!store || (store.owner as any)._id != user_id) {
-      return response.status(401).json({ message: "user must own store" });
+      return response
+        .status(UNAUTHORIZED)
+        .json({ message: getStatusText(UNAUTHORIZED) });
     }
 
     /**
