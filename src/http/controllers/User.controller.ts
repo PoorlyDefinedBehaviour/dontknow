@@ -54,7 +54,7 @@ export default class UserController {
     if (!ok) {
       return response
         .status(UNPROCESSABLE_ENTITY)
-        .json(getStatusText(UNPROCESSABLE_ENTITY));
+        .json({ message: getStatusText(UNPROCESSABLE_ENTITY) });
     }
 
     return response.status(201).json(user);
