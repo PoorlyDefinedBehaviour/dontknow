@@ -27,7 +27,7 @@ export default class UserController {
   ): Promise<Response> => {
     const { _id } = request.params;
 
-    const user = await UserService.findOneBy({
+    const { data: user } = await UserService.findOneBy({
       _id
     });
 
