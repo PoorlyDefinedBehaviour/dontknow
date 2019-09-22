@@ -5,11 +5,6 @@ const mongooseAutoPopulate = require("mongoose-autopopulate");
 
 const UserSchema = new mongoose.Schema(
   {
-    accountLocked: {
-      type: Boolean,
-      select: true,
-      default: false
-    },
     email: {
       type: String,
       required: true,

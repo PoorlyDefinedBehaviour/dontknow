@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import StoreController from "../controllers/Store";
+import StoreController from "../controllers/Store.controller";
 import sessionRequired from "../middlewares/SessionRequired";
 
 const router: Router = express.Router();

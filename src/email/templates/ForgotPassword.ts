@@ -1,6 +1,4 @@
-export const ForgotPasswordEmailTemplate = (
-  link: string
-): string => `<!DOCTYPE html>
+export default (link: string): string => `<!DOCTYPE html>
 <html>
 <head>
 

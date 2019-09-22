@@ -13,6 +13,7 @@ import {
   UNPROCESSABLE_ENTITY,
   CREATED
 } from "http-status-codes";
+import ScheduleService from "../services/Schedule.service";
 
 export default class ScheduleController {
   public static index = async (
@@ -21,9 +22,7 @@ export default class ScheduleController {
   ): Promise<Response> => {
     const { page = 0 } = request.query;
 
-    const schedules: ISchedule[] = await Schedule.find()
-      .skip(parseInt(page) * 20)
-      .limit(20);
+    const { data: schedules } = await ScheduleService.findAll(page);
 
     return response.json({ page, schedules });
   };
@@ -35,12 +34,10 @@ export default class ScheduleController {
     const { user_id } = request.session;
     const { _id } = request.params;
 
-    const schedule: Maybe<ISchedule> = await Schedule.findOne({ _id });
-
-    if (
-      !schedule ||
-      (schedule.issuer as any).owner._id.toString() !== user_id.toString()
-    ) {
+    const { ok, data: schedule } = await ScheduleService.findOneBy(user_id, {
+      _id
+    });
+    if (!ok) {
       return response
         .status(UNAUTHORIZED)
         .json({ message: getStatusText(UNAUTHORIZED) });
@@ -55,24 +52,11 @@ export default class ScheduleController {
   ): Promise<Response> => {
     const { date, time, page = 0 } = request.query;
 
-    const schedules: ISchedule[] = await Schedule.find({
-      $or: [
-        {
-          date: {
-            $regex: new RegExp(date),
-            $options: "i"
-          }
-        },
-        {
-          time: {
-            $regex: new RegExp(time),
-            $options: "i"
-          }
-        }
-      ]
-    })
-      .skip(parseInt(page) * 20)
-      .limit(20);
+    const { data: schedules } = await ScheduleService.findManyBytext(
+      date,
+      time,
+      page
+    );
 
     return response.json({ page, schedules });
   };
@@ -82,30 +66,18 @@ export default class ScheduleController {
     response: Response
   ): Promise<Response> => {
     const { user_id } = request.session;
+    const { client } = request.body;
 
-    const errors: Maybe<IFormattedYupError[]> = await yupValidate(
-      ScheduleRegisterSchema,
+    const { ok, data: schedule } = await ScheduleService.register(
+      user_id,
+      client,
       request.body
     );
-
-    if (errors) {
-      return response.status(UNPROCESSABLE_ENTITY).json(errors);
-    }
-
-    const store = await Store.findOne({ owner: user_id }).lean();
-    const client = await Client.findOne({ _id: request.body.client }).lean();
-
-    if (
-      !store ||
-      !client ||
-      client.store._id.toString() !== store._id.toString()
-    ) {
+    if (!ok) {
       return response
-        .status(UNAUTHORIZED)
-        .json({ message: getStatusText(UNAUTHORIZED) });
+        .status(UNPROCESSABLE_ENTITY)
+        .json({ message: getStatusText(UNPROCESSABLE_ENTITY) });
     }
-
-    const schedule: ISchedule = await Schedule.create(request.body);
 
     return response.status(CREATED).json(schedule);
   };
