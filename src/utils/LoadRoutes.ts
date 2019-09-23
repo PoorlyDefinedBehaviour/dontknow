@@ -11,7 +11,7 @@ export default (app: Express): void => {
   );
 
   for (const file of file_names) {
-    const router = require(join(path, file));
-    app.use("/api/v1/", router.default);
+    const { default: router } = require(join(path, `${file}.route`));
+    app.use("/api/v1/", router);
   }
 };

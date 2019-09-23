@@ -5,6 +5,7 @@ import yupValidate from "../../utils/YupValidate";
 import { IFormattedYupError } from "../../utils/FormatYupError";
 import { ScheduleRegisterSchema } from "../../validation/schemas/ScheduleRegister";
 import StoreService from "./Store.service";
+import ClientService from "./Client.service";
 
 export default class ScheduleService {
   public static findAll = async (
@@ -79,7 +80,7 @@ export default class ScheduleService {
     if (
       !store ||
       !client ||
-      client.store._id.toString() !== store._id.toString()
+      (client.store as any)._id.toString() !== store._id.toString()
     ) {
       return { ok: false };
     }

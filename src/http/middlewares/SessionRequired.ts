@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import RequestWithSession from "../../interfaces/RequestWithSession";
-import { Unauthorized } from "../messages/Unauthorized";
+import { getStatusText, UNAUTHORIZED } from "http-status-codes";
 
 export default (
   request: RequestWithSession,
@@ -8,7 +8,7 @@ export default (
   next: NextFunction
 ) => {
   if (!request.session || !request.session.user_id) {
-    return response.status(401).json(Unauthorized);
+    return response.status(401).json({ message: getStatusText(UNAUTHORIZED) });
   }
   return next();
 };

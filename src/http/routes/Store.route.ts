@@ -5,7 +5,6 @@ import sessionRequired from "../middlewares/SessionRequired";
 const router: Router = express.Router();
 
 router.get("/store", sessionRequired, StoreController.index);
-router.get("/store/search", StoreController.search);
 router.get("/store/:_id", StoreController.getById);
 
 router.post("/store", sessionRequired, StoreController.register);

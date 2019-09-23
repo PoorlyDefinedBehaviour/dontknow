@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-export default sendEmail = (to: string, subject: string, html: string): void =>
+export default (to: string, subject: string, html: string): void =>
   transporter.sendMail(
     { from: process.env.EMAIL as string, to, subject, html },
     (ex: Maybe<Error>, _: SentMessageInfo): void => {

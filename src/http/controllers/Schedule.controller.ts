@@ -1,11 +1,4 @@
 import { Response } from "express";
-import { Maybe } from "../../types/Maybe";
-import { IFormattedYupError } from "../../utils/FormatYupError";
-import yupValidate from "../../utils/YupValidate";
-import { ScheduleRegisterSchema } from "../../validation/schemas/ScheduleRegister";
-import Schedule, { ISchedule } from "../../database/models/Schedule";
-import Store from "../../database/models/Store";
-import Client from "../../database/models/Client";
 import RequestWithSession from "../../interfaces/RequestWithSession";
 import {
   UNAUTHORIZED,
