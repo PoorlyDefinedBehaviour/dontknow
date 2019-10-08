@@ -1,7 +1,7 @@
 import ExpressSession from "express-session";
 import ConnectRedis from "connect-redis";
-import redis from "../Redis";
-import { RedisSessionPrefix } from "../Prefixes";
+import redis from "../redis";
+import { RedisSessionPrefix } from "../prefixes";
 
 const RedisStore: ConnectRedis.RedisStore = ConnectRedis(ExpressSession);
 

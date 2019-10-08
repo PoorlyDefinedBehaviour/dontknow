@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import RequestWithSession from "../../interfaces/RequestWithSession";
+import RequestWithSession from "../../interfaces/request-with-session.interface";
 import { getStatusText, UNAUTHORIZED } from "http-status-codes";
 
 export default (

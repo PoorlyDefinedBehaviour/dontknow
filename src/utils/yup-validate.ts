@@ -1,5 +1,5 @@
-import formatYupError, { IFormattedYupError } from "./FormatYupError";
-import { Maybe } from "../types/Maybe";
+import formatYupError, { IFormattedYupError } from "./format-yup-error";
+import { Maybe } from "../typings/maybe";
 
 export default async (
   schema: any,

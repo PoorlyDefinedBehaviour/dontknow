@@ -1,5 +1,5 @@
 import nodemailer, { SentMessageInfo } from "nodemailer";
-import { Maybe } from "../types/Maybe";
+import { Maybe } from "../typings/maybe";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",

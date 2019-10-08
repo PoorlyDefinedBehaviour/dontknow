@@ -1,7 +1,7 @@
 import { readdirSync } from "fs";
 import { join } from "path";
 
-import { Express } from "express-serve-static-core";
+import { Express } from "express";
 
 export default (app: Express): void => {
   const path: string = join(__dirname, "..", "http", "routes");

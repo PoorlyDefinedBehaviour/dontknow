@@ -13,5 +13,5 @@ export default (
     ? response
         .status(INTERNAL_SERVER_ERROR)
         .json({ message: getStatusText(INTERNAL_SERVER_ERROR) })
-    : response.status(INTERNAL_SERVER_ERROR).json(error);
+    : response.status(INTERNAL_SERVER_ERROR).json({ message: error });
 };
