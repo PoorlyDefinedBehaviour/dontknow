@@ -1,4 +1,4 @@
-import mongoose from "../mongodb";
+import mongoose from "../mongo";
 
 const researchSchema = new mongoose.Schema({
   authors: {

@@ -1,4 +1,4 @@
-import mongoose from "../mongodb";
+import mongoose from "../mongo";
 import { hash } from "bcryptjs";
 import { NextFunction } from "express";
 
