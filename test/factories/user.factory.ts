@@ -9,8 +9,5 @@ export default class UserFactory {
   public static createMany = (quantity: number) =>
     Array(quantity)
       .fill(null)
-      .map((_) => ({
-        email: faker.internet.email(),
-        password: faker.internet.password()
-      }));
+      .map((_) => UserFactory.createOne());
 }
