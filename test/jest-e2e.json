@@ -7,5 +7,6 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "coverageDirectory": "./coverage",
-  "coveragePathIgnorePatterns": ["/node_modules/"]
+  "coveragePathIgnorePatterns": ["/node_modules/"],
+  "setupFilesAfterEnv": ["./setup.ts"]
 }

@@ -3,7 +3,6 @@ import express, { Express } from "express";
 import loadRoutes from "./utils/load-routes";
 import cors from "cors";
 import rateLimit from "./config/express-rate-limit.config";
-import sessionHandler from "./config/express-session.config";
 import globalExceptionHandler from "./http/middlewares/global-exception-handler.middleware";
 import morgan from "morgan";
 import helmet from "helmet";
@@ -19,7 +18,6 @@ async function main(): Promise<void> {
   app.use(express.json());
   app.use(cors());
   app.use(rateLimit);
-  app.use(sessionHandler);
   app.use(globalExceptionHandler);
 
   loadRoutes(app);

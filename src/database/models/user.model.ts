@@ -1,6 +1,6 @@
-import * as mongoose from "mongoose";
+import mongoose from "../mongodb";
 import { hash } from "bcryptjs";
-import { NextFunction } from "connect";
+import { NextFunction } from "express";
 
 const userSchema = new mongoose.Schema(
   {
@@ -28,6 +28,12 @@ const userSchema = new mongoose.Schema(
       unique: false,
       select: false
     },
+    token: {
+      type: String,
+      required: false,
+      unique: false,
+      select: false
+    },
     summary: {
       type: String,
       required: false,
@@ -51,7 +57,7 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true
   }
-).pre("save", async function(this: any, next: NextFunction) {
+).pre("save", async function(this: any, next: NextFunction): Promise<void> {
   const password: string = this.get("password");
 
   if (password && this.isModified("password")) {
@@ -67,6 +73,7 @@ export interface IUser extends mongoose.Document {
   last_name: string;
   email: string;
   password: string;
+  token: string;
   summary: string;
   social_network_links: string[];
   researches: mongoose.Types.ObjectId[];

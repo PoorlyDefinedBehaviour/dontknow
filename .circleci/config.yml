@@ -8,6 +8,10 @@ jobs:
     docker:
       # specify the version you desire here
       - image: circleci/node:10
+        environment:
+          NODE_ENV: test
+          MONGOBD_TEST_URL: mongodb://localhost/test
+      - image: mongo
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
