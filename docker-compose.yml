@@ -1,0 +1,27 @@
+version: "3"
+services:
+  db:
+    restart: always
+    image: mongo
+    volumes:
+      - ./mongodata:/var/lib/mongodata/data
+    ports:
+      - "27017:27017"
+  redis:
+    restart: always
+    image: redis
+    volumes:
+      - ./redisdata:/var/lib/redisdata/data
+    ports:
+      - "6379:6379"
+  app:
+    restart: always
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/app
+    depends_on:
+      - db
+      - redis
+    command: yarn start
