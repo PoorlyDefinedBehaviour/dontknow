@@ -22,7 +22,6 @@ export default class UserService {
     const userExists: Maybe<IUser> = await User.findOne({
       email: payload.email
     });
-
     if (userExists) {
       return { ok: false, message: "Email already in use" };
     }

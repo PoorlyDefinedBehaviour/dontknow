@@ -1,38 +1,38 @@
 import request from "supertest";
-import { app } from "../../src/main";
 import UserFactory from "../factories/user.factory";
+import { server } from "../../src/main";
 
 describe("user test suite", () => {
-  test("register user", (done) => {
-    request(app)
+  test("register user", async (done) => {
+    request(server)
       .post("/api/v1/user")
       .send({ payload: UserFactory.createOne() })
       .expect(201, done);
   });
 
-  test("login", (done) => {
+  test("login", async (done) => {
     const user = UserFactory.createOne();
 
-    request(app)
+    request(server)
       .post("/api/v1/user")
       .send({ payload: user })
       .end((_, __) => {
-        request(app)
+        request(server)
           .post("/api/v1/user/login")
           .send({ payload: { email: user.email, password: user.password } })
           .expect(200, done);
       });
   });
 
-  test("logout", (done) => {
+  test("logout", async (done) => {
     const user = UserFactory.createOne();
 
-    request(app)
+    request(server)
       .post("/api/v1/user")
       .send({ payload: user })
       .end((_, { text }) => {
         const token = JSON.parse(text).data.token;
-        request(app)
+        request(server)
           .post("/api/v1/user/logout")
           .set("Authorization", `Bearer ${token}`)
           .send()
@@ -40,20 +40,24 @@ describe("user test suite", () => {
       });
   });
 
-  test("update one user", (done) => {
+  test("update one user", async (done) => {
     const user = UserFactory.createOne();
     const newEmail = "newemail@newemail.com";
 
-    request(app)
+    request(server)
       .post("/api/v1/user")
       .send({ payload: user })
       .end((_, { text }) => {
         const token = JSON.parse(text).data.token;
-        request(app)
+        request(server)
           .patch("/api/v1/user")
           .set("Authorization", `Bearer ${token}`)
           .send({ payload: { email: newEmail } })
           .expect(200, done);
       });
+  });
+
+  afterAll(async () => {
+    await server.close();
   });
 });

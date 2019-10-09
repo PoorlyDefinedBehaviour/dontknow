@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/.bin/cross-env NODE_ENV=test jest --forceExit --detectOpenHandles --testTimeout=10000 --config ./test/jest-e2e.json",
+    "test": "node_modules/.bin/cross-env NODE_ENV=test jest --forceExit --detectOpenHandles --testTimeout=10000  --config ./test/jest-e2e.json",
     "cov": "jest --coverage",
     "compile": "./node_modules/.bin/tsc",
     "start": "clear && ./node_modules/.bin/ts-node src/main",

@@ -15,12 +15,12 @@ const researchSchema = new mongoose.Schema({
   },
   summary: {
     type: String,
-    required: false,
+    required: true,
     unique: false,
     select: true
   },
-  link: {
-    type: String,
+  links: {
+    type: [String],
     required: false,
     unique: false,
     select: true
