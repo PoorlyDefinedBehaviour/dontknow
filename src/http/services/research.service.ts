@@ -33,4 +33,59 @@ export default class ResearchService {
 
     return { ok: true, data: research };
   };
+
+  public static findAllByAuthorId = async (
+    authorId: string
+  ): Promise<IServiceResult<IResearch[]>> => {
+    const researches: IResearch[] = await Research.find({
+      authors: authorId
+    });
+
+    return { ok: true, data: researches };
+  };
+
+  public static findById = async (
+    researchId: string
+  ): Promise<IServiceResult<Maybe<IResearch>>> => {
+    const research: Maybe<IResearch> = await Research.findOne({
+      _id: researchId
+    });
+
+    return { ok: true, data: research };
+  };
+  public static updateOne = async (
+    authorId: string,
+    researchId: string,
+    payload: Partial<IResearch>
+  ): Promise<IServiceResult<Maybe<IResearch>>> => {
+    const research: Maybe<IResearch> = await Research.findOneAndUpdate(
+      {
+        $and: [
+          { authors: authorId },
+          {
+            _id: researchId
+          }
+        ]
+      },
+      payload,
+      { new: true }
+    );
+
+    if (!research) {
+      return { ok: false };
+    }
+
+    return { ok: true, data: research };
+  };
+
+  public static deleteOne = async (
+    authorId: string,
+    researchId: string
+  ): Promise<IServiceResult<IResearch>> => {
+    await Research.deleteOne({
+      $and: [{ _id: researchId, authors: authorId }]
+    });
+
+    return { ok: true };
+  };
 }

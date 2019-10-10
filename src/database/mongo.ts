@@ -14,7 +14,7 @@ mongoose.connect(
     keepAliveInitialDelay: 30000,
     useUnifiedTopology: true
   },
-  (error: any): any => {
+  (error: Error): void => {
     if (error) {
       throw error;
     }

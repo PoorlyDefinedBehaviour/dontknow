@@ -3,6 +3,10 @@ import UserFactory from "../factories/user.factory";
 import { server } from "../../src/main";
 
 describe("user test suite", () => {
+  afterAll(async () => {
+    await server.close();
+  });
+
   test("register user", async (done) => {
     request(server)
       .post("/api/v1/user")
@@ -55,9 +59,5 @@ describe("user test suite", () => {
           .send({ payload: { email: newEmail } })
           .expect(200, done);
       });
-  });
-
-  afterAll(async () => {
-    await server.close();
   });
 });
