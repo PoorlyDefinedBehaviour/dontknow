@@ -31,10 +31,9 @@ export default class ResearchController {
     request: Request,
     response: Response
   ): Promise<Response> => {
-    console.log("request.params", request.params);
-    const { authroId } = request.params;
+    const { authorId } = request.params;
 
-    const { data } = await ResearchService.findAllByAuthorId(authroId);
+    const { data } = await ResearchService.findAllByAuthorId(authorId);
 
     return response.status(OK).json({ data });
   };
