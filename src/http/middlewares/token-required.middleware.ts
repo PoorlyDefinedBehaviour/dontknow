@@ -28,7 +28,7 @@ const tokenRequired = async (
   }
 
   const result: any = await decodeToken(bearerToken);
-  if (!result.payload) {
+  if (!result || !result.payload) {
     return response
       .status(UNAUTHORIZED)
       .json({ message: getStatusText(UNAUTHORIZED) });
@@ -38,7 +38,7 @@ const tokenRequired = async (
     result.payload.userId,
     result.token
   );
-  
+
   if (!isTokenValid) {
     return response
       .status(UNAUTHORIZED)

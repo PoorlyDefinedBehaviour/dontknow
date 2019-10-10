@@ -57,7 +57,12 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true
   }
-).pre("save", async function(this: any, next: NextFunction): Promise<void> {
+);
+
+userSchema.pre("save", async function(
+  this: any,
+  next: NextFunction
+): Promise<void> {
   const password: string = this.get("password");
 
   if (password && this.isModified("password")) {

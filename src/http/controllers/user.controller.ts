@@ -61,13 +61,13 @@ export default class UserController {
     const userId = request.body.tokenPayload;
     const { payload } = request.body;
 
-    const { ok, data: user } = await UserService.updateOne(userId, payload);
+    const { ok, data } = await UserService.updateOne(userId, payload);
     if (!ok) {
       return response
         .status(BAD_REQUEST)
         .json({ message: getStatusText(BAD_REQUEST) });
     }
 
-    return response.status(OK).json(user);
+    return response.status(OK).json(data);
   };
 }

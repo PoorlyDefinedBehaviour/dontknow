@@ -1,6 +1,6 @@
 import "dotenv/config";
 import mongoose from "../src/database/mongo";
 
-afterAll(async () => {
+beforeAll(async () => {
   await mongoose.connection.dropDatabase();
 });
