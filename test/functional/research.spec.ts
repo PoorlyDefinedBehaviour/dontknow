@@ -65,7 +65,6 @@ describe("research test suite", () => {
       .set("Authorization", `Bearer ${mockUserToken}`)
       .send({ payload: ResearchFactory.createOne() });
 
-    console.log(`/api/v1/researchs/${mockUser._id}`);
     const { body: researchResponseBody } = await request(server).get(
       `/api/v1/researchs/${mockUser._id}`
     );
