@@ -6,8 +6,47 @@ import { Maybe } from "../../typings/maybe";
 import { IFormattedYupError } from "../../utils/format-yup-error";
 import { compare } from "bcryptjs";
 import { sign } from "jsonwebtoken";
+import { unlink } from "fs";
 
 export default class UserService {
+  public static findUserById = async (
+    userId: string
+  ): Promise<IServiceResult<Maybe<IUser>>> => {
+    const user: Maybe<IUser> = await User.findOne({ _id: userId });
+
+    return { ok: true, data: user };
+  };
+
+  public static setUserAvatar = async (
+    userId: string,
+    file: Express.Multer.File
+  ): Promise<IServiceResult<IUser>> => {
+    const user: Maybe<IUser> = await User.findOne({ _id: userId });
+
+    user!.avatar = file.filename;
+    await user!.save();
+
+    return { ok: true, data: user! };
+  };
+
+  public static removeUserAvatar = async (
+    userId: string
+  ): Promise<IServiceResult<IUser>> => {
+    const user: Maybe<IUser> = await User.findOne({ _id: userId });
+
+    const defaultProfileImage: string = "default-profile-picture.png";
+    if (user!.avatar == defaultProfileImage) {
+      return { ok: true, data: user! };
+    }
+
+    unlink(`${process.cwd()}/uploads/${user!.avatar}`, () => {});
+
+    user!.avatar = defaultProfileImage;
+    await user!.save();
+
+    return { ok: true, data: user! };
+  };
+
   public static register = async (
     payload: Partial<IUser>
   ): Promise<IServiceResult<{ user: IUser; token: string }>> => {

@@ -21,13 +21,8 @@ const tokenRequired = async (
   next: NextFunction
 ) => {
   const bearerToken: Maybe<string> = request.headers.authorization;
-  if (!bearerToken) {
-    return response
-      .status(UNAUTHORIZED)
-      .json({ message: getStatusText(UNAUTHORIZED) });
-  }
 
-  const result: any = await decodeToken(bearerToken);
+  const result: any = await decodeToken(bearerToken || "");
   if (!result || !result.payload) {
     return response
       .status(UNAUTHORIZED)

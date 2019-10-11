@@ -4,6 +4,13 @@ import { NextFunction } from "express";
 
 const userSchema = new mongoose.Schema(
   {
+    avatar: {
+      type: String,
+      required: false,
+      unique: false,
+      select: true,
+      default: "default-profile-picture.png"
+    },
     first_name: {
       type: String,
       required: false,
@@ -74,6 +81,7 @@ userSchema.pre("save", async function(
 
 export interface IUser extends mongoose.Document {
   _id: string;
+  avatar: string;
   first_name: string;
   last_name: string;
   email: string;
