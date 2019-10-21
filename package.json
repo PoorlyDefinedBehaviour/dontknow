@@ -8,7 +8,7 @@
     "cov": "jest --coverage",
     "compile": "./node_modules/.bin/tsc",
     "run": "yarn compile && yan start",
-    "start": "node build/src/main",
+    "start": "ts-node src/main",
     "dev": "./node_modules/.bin/ts-node-dev --inspect -- src/main"
   },
   "keywords": [],
