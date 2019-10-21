@@ -1,10 +1,10 @@
 import * as yup from "yup";
 
-export const researchRegisterSchema = yup.object().shape({
-  topic: yup
+const researchRegisterSchema = yup.object().shape({
+  title: yup
     .string()
-    .min(5, "Topic must be at least 5 characters long")
-    .max(255, "Topic can't be longer than 255 characters")
+    .min(5, "title must be at least 5 characters long")
+    .max(255, "title can't be longer than 255 characters")
     .required(),
   summary: yup
     .string()
@@ -12,3 +12,5 @@ export const researchRegisterSchema = yup.object().shape({
     .max(500, "Password can't be longer than 500 characters")
     .required()
 });
+
+export default researchRegisterSchema;

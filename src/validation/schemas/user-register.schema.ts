@@ -1,6 +1,8 @@
 import * as yup from "yup";
 
-export const userRegisterSchema = yup.object().shape({
+const userRegisterSchema = yup.object().shape({
+  firstName: yup.string().required(),
+  lastName: yup.string().required(),
   email: yup
     .string()
     .email()
@@ -11,3 +13,5 @@ export const userRegisterSchema = yup.object().shape({
     .max(255, "Password can't be longer than 255 characters")
     .required()
 });
+
+export default userRegisterSchema;

@@ -74,13 +74,13 @@ describe("research test suite", () => {
   });
 
   test("delete one research", async (done) => {
-    const { body: researchResponseBody } = await request(server)
+    const { body: research } = await request(server)
       .post("/api/v1/research")
       .set("Authorization", `Bearer ${mockUserToken}`)
       .send({ payload: ResearchFactory.createOne() });
 
     request(server)
-      .delete(`/api/v1/research/${researchResponseBody.data._id}`)
+      .delete(`/api/v1/research/${research.data._id}`)
       .set("Authorization", `Bearer ${mockUserToken}`)
       .expect(204, done);
   });

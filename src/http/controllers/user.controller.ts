@@ -72,16 +72,47 @@ export default class UserController {
   ): Promise<Response> => {
     const userId: string = request.body.tokenPayload;
 
-    const { ok } = await UserService.setUserAvatar(userId, request.file);
+    const { ok, data } = await UserService.setUserAvatar(userId, request.file);
     if (!ok) {
       return response
         .status(BAD_REQUEST)
         .json({ message: getStatusText(BAD_REQUEST) });
     }
 
-    return response
-      .send(NO_CONTENT)
-      .json({ message: getStatusText(NO_CONTENT) });
+    return response.status(OK).json({ data });
+  };
+
+  public static addExperience = async (
+    request: Request,
+    response: Response
+  ): Promise<Response> => {
+    const userId: string = request.body.tokenPayload;
+
+    const { ok, message, data } = await UserService.addExperience(
+      userId,
+      request.body.payload
+    );
+    if (!ok) {
+      return response.status(UNPROCESSABLE_ENTITY).json({ message });
+    }
+    return response.status(OK).json({ data });
+  };
+
+  public static removeExperience = async (
+    request: Request,
+    response: Response
+  ): Promise<Response> => {
+    const userId: string = request.body.tokenPayload;
+    const { experienceId } = request.params;
+
+    const { ok, message } = await UserService.removeExperience(
+      userId,
+      experienceId
+    );
+    if (!ok) {
+      return response.status(UNPROCESSABLE_ENTITY).json({ message });
+    }
+    return response.sendStatus(200);
   };
 
   public static removeUserAvatar = async (

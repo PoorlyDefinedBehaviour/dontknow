@@ -1,12 +1,14 @@
-import User, { IUser } from "../../database/models/user.model";
+import User, { IUser, IExperience } from "../../database/models/user.model";
 import IServiceResult from "../../interfaces/service-result.interface";
 import yupValidate from "../../utils/yup-validate";
-import { userRegisterSchema } from "../../validation/schemas/user-register.schema";
 import { Maybe } from "../../typings/maybe";
 import { IFormattedYupError } from "../../utils/format-yup-error";
 import { compare } from "bcryptjs";
 import { sign } from "jsonwebtoken";
 import { unlink } from "fs";
+import userRegisterSchema from "../../validation/schemas/user-register.schema";
+import addExperienceSchema from "../../validation/schemas/add-experience";
+import { v4 } from "uuid";
 
 export default class UserService {
   public static findUserById = async (
@@ -20,13 +22,13 @@ export default class UserService {
   public static setUserAvatar = async (
     userId: string,
     file: Express.Multer.File
-  ): Promise<IServiceResult<IUser>> => {
+  ): Promise<IServiceResult<string>> => {
     const user: Maybe<IUser> = await User.findOne({ _id: userId });
 
     user!.avatar = file.filename;
     await user!.save();
 
-    return { ok: true, data: user! };
+    return { ok: true, data: file.filename };
   };
 
   public static removeUserAvatar = async (
@@ -39,7 +41,7 @@ export default class UserService {
       return { ok: true, data: user! };
     }
 
-    unlink(`${process.cwd()}/uploads/${user!.avatar}`, () => {});
+    unlink(`${process.cwd()}/public/${user!.avatar}`, () => {});
 
     user!.avatar = defaultProfileImage;
     await user!.save();
@@ -107,6 +109,57 @@ export default class UserService {
     userId: string
   ): Promise<IServiceResult<{}>> => {
     await User.findOneAndUpdate({ _id: userId }, { token: "" });
+
+    return { ok: true };
+  };
+
+  public static addResearch = async (
+    userId: string,
+    researchId: string
+  ): Promise<void> => {
+    const user = await User.findOne({ _id: userId });
+    if (user) {
+      user.researches.push(researchId as any);
+      await user.save();
+    }
+  };
+
+  public static addExperience = async (
+    userId: string,
+    payload: IExperience
+  ): Promise<IServiceResult<{ id: string }>> => {
+    const errors: Maybe<IFormattedYupError[]> = await yupValidate(
+      addExperienceSchema,
+      payload
+    );
+    if (errors) {
+      return { ok: false, message: errors };
+    }
+
+    const user = await User.findOne({ _id: userId });
+    const id = v4();
+    if (user) {
+      user.experiences.push({ ...payload, id });
+      await user.save();
+    }
+
+    return { ok: true, data: { id } };
+  };
+
+  public static removeExperience = async (
+    userId: string,
+    experienceId: string
+  ): Promise<IServiceResult<{}>> => {
+    const user = await User.findOne({
+      _id: userId
+    });
+
+    if (user) {
+      user.experiences = user.experiences.filter(
+        (exp) => exp.id === experienceId
+      );
+      await user.save();
+    }
 
     return { ok: true };
   };

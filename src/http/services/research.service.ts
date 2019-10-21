@@ -1,9 +1,10 @@
 import Research, { IResearch } from "../../database/models/research.model";
 import IServiceResult from "../../interfaces/service-result.interface";
 import yupValidate from "../../utils/yup-validate";
-import { researchRegisterSchema } from "../../validation/schemas/research-register.schema";
 import { Maybe } from "../../typings/maybe";
 import { IFormattedYupError } from "../../utils/format-yup-error";
+import UserService from "./user.service";
+import researchRegisterSchema from "../../validation/schemas/research-register.schema";
 
 export default class ResearchService {
   public static create = async (
@@ -19,7 +20,7 @@ export default class ResearchService {
     }
 
     const researchAlreadyCreatedByAuthor = await Research.findOne({
-      $and: [{ authors: authorId }, { topic: payload.topic }]
+      $and: [{ authors: authorId }, { title: payload.title }]
     });
     if (researchAlreadyCreatedByAuthor) {
       return { ok: false, message: "Research already registered by this user" };
@@ -30,6 +31,8 @@ export default class ResearchService {
       authors: [authorId]
     };
     const research: IResearch = await Research.create(researchToBeCreated);
+
+    await UserService.addResearch(authorId, research._id);
 
     return { ok: true, data: research };
   };

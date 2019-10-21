@@ -2,7 +2,7 @@ import faker from "faker";
 
 export default class ResearchFactory {
   public static createOne = () => ({
-    topic: faker.random.alphaNumeric(10),
+    title: `faker.random.alphaNumeric(10)-${Math.random()}`,
     summary: faker.random.alphaNumeric(10)
   });
 

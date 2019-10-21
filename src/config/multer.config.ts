@@ -4,7 +4,7 @@ import { Request } from "express";
 
 const storageTypes = {
   local: multer.diskStorage({
-    destination: `${process.cwd()}/uploads`,
+    destination: `${process.cwd()}/public`,
     filename: (_: Request, file: Express.Multer.File, callback: any) => {
       randomBytes(16, (error: Error | null, hash: Buffer) => {
         if (error) callback(error, "");
@@ -34,7 +34,7 @@ const storageTypes = {
 };
 
 const multerConfig = {
-  dest: `${process.cwd()}/uploads`,
+  dest: `${process.cwd()}/public`,
   storage: storageTypes["local"],
   limits: {
     fileSize: 2 * 1024 * 1024

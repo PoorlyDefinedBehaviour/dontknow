@@ -8,7 +8,7 @@ const researchSchema = new mongoose.Schema(
       unique: false,
       select: true
     },
-    topic: {
+    title: {
       type: String,
       required: true,
       unique: false,
@@ -20,8 +20,8 @@ const researchSchema = new mongoose.Schema(
       unique: false,
       select: true
     },
-    links: {
-      type: [String],
+    link: {
+      type: String,
       required: false,
       unique: false,
       select: true
@@ -30,11 +30,11 @@ const researchSchema = new mongoose.Schema(
   {
     timestamps: true
   }
-).plugin(require("mongoose-autopopulate"));
+)
 
 export interface IResearch extends mongoose.Document {
   authors: mongoose.Types.ObjectId[];
-  topic: string;
+  title: string;
   summary: string;
   link: string;
 }
