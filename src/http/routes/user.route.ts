@@ -11,7 +11,12 @@ router.get("/user/:_id", UserController.getUserById);
 router.post("/user", UserController.register);
 router.post("/user/login", UserController.login);
 router.post("/user/logout", tokenRequired, UserController.logout);
-
+router.post("/user/experience", tokenRequired, UserController.addExperience);
+router.delete(
+  "/user/experience/:experienceId",
+  tokenRequired,
+  UserController.removeExperience
+);
 router.post(
   "/user/avatar",
   tokenRequired,
